@@ -1,9 +1,0 @@
-{
-    "trailingSlash": false,
-    "rewrites": [
-        { 
-            "source": "/cmd/api(.*)", 
-            "destination": "/cmd/api/main.go" 
-        }
-    ]
-}
