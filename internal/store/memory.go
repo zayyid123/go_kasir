@@ -7,3 +7,9 @@ var Products = []model.Product{
 }
 
 var ProductAutoID uint = 2
+
+var Categories = []model.Category{
+	{ID: 1, Name: "Kategori A", Description: "Deskripsi Kategori A"},
+}
+
+var CategoryAutoID uint = 2

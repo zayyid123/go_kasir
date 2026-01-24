@@ -19,9 +19,18 @@ func Register(r *gin.Engine) {
 			"message": "Welcome to Go Kasir API",
 		})
 	})
+
+	// Product routes
 	api.GET("/products", handler.GetProducts)
 	api.POST("/products", handler.CreateProduct)
 	api.GET("/products/:id", handler.GetProductByID)
 	api.PUT("/products/:id", handler.UpdateProduct)
 	api.DELETE("/products/:id", handler.DeleteProduct)
+
+	// Category routes
+	api.GET("/categories", handler.GetCategories)
+	api.POST("/categories", handler.CreateCategory)
+	api.GET("/categories/:id", handler.GetCategoryByID)
+	api.PUT("/categories/:id", handler.UpdateCategory)
+	api.DELETE("/categories/:id", handler.DeleteCategory)
 }
