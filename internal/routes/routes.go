@@ -4,11 +4,21 @@ import (
 	"kasir-api/internal/handler"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "kasir-api/docs"
 )
 
 func Register(r *gin.Engine) {
 	api := r.Group("/api")
 
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "Welcome to Go Kasir API",
+		})
+	})
 	api.GET("/products", handler.GetProducts)
 	api.POST("/products", handler.CreateProduct)
 	api.GET("/products/:id", handler.GetProductByID)
