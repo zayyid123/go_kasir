@@ -11,8 +11,6 @@ import (
 )
 
 func Register(r *gin.Engine) {
-	api := r.Group("/api")
-
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -20,17 +18,20 @@ func Register(r *gin.Engine) {
 		})
 	})
 
+	// Health check route
+	r.GET("/health", handler.GetHealth)
+
 	// Product routes
-	api.GET("/products", handler.GetProducts)
-	api.POST("/products", handler.CreateProduct)
-	api.GET("/products/:id", handler.GetProductByID)
-	api.PUT("/products/:id", handler.UpdateProduct)
-	api.DELETE("/products/:id", handler.DeleteProduct)
+	r.GET("/products", handler.GetProducts)
+	r.POST("/products", handler.CreateProduct)
+	r.GET("/products/:id", handler.GetProductByID)
+	r.PUT("/products/:id", handler.UpdateProduct)
+	r.DELETE("/products/:id", handler.DeleteProduct)
 
 	// Category routes
-	api.GET("/categories", handler.GetCategories)
-	api.POST("/categories", handler.CreateCategory)
-	api.GET("/categories/:id", handler.GetCategoryByID)
-	api.PUT("/categories/:id", handler.UpdateCategory)
-	api.DELETE("/categories/:id", handler.DeleteCategory)
+	r.GET("/categories", handler.GetCategories)
+	r.POST("/categories", handler.CreateCategory)
+	r.GET("/categories/:id", handler.GetCategoryByID)
+	r.PUT("/categories/:id", handler.UpdateCategory)
+	r.DELETE("/categories/:id", handler.DeleteCategory)
 }

@@ -8,7 +8,7 @@
     },
     "basePath": "/",
     "paths": {
-        "/api/categories": {
+        "/categories": {
             "get": {
                 "description": "Ambil semua kategori",
                 "produces": [
@@ -63,7 +63,7 @@
                 }
             }
         },
-        "/api/categories/{id}": {
+        "/categories/{id}": {
             "get": {
                 "description": "Ambil kategori berdasarkan ID",
                 "produces": [
@@ -158,7 +158,30 @@
                 }
             }
         },
-        "/api/products": {
+        "/health": {
+            "get": {
+                "description": "Check API health status",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Get health status",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/products": {
             "get": {
                 "description": "Ambil semua produk",
                 "produces": [
@@ -213,7 +236,7 @@
                 }
             }
         },
-        "/api/products/{id}": {
+        "/products/{id}": {
             "get": {
                 "description": "Ambil produk berdasarkan ID",
                 "produces": [

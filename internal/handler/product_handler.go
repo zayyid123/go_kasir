@@ -18,7 +18,7 @@ import (
 // @Tags Products
 // @Produce json
 // @Success 200 {array} model.Product
-// @Router /api/products [get]
+// @Router /products [get]
 func GetProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, service.GetProducts())
 }
@@ -30,7 +30,7 @@ func GetProducts(c *gin.Context) {
 // @Produce json
 // @Param id path uint true "Product ID"
 // @Success 200 {object} model.Product
-// @Router /api/products/{id} [get]
+// @Router /products/{id} [get]
 func GetProductByID(c *gin.Context) {
 	idParam := c.Param("id")
 	// Convert idParam to uint
@@ -58,7 +58,7 @@ func GetProductByID(c *gin.Context) {
 // @Produce json
 // @Param product body model.CreateProductRequest true "Product to create"
 // @Success 201 {object} model.Product
-// @Router /api/products [post]
+// @Router /products [post]
 func CreateProduct(c *gin.Context) {
 	var req model.CreateProductRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -79,7 +79,7 @@ func CreateProduct(c *gin.Context) {
 // @Param id path uint true "Product ID"
 // @Param product body model.UpdateProductRequest true "Product data to update"
 // @Success 200 {object} model.Product
-// @Router /api/products/{id} [put]
+// @Router /products/{id} [put]
 func UpdateProduct(c *gin.Context) {
 	idParam := c.Param("id")
 	var req model.UpdateProductRequest
@@ -96,13 +96,13 @@ func UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	_, err = service.UpdateProduct(id, req)
+	product, err := service.UpdateProduct(id, req)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "product updated successfully"})
+	c.JSON(http.StatusOK, product)
 }
 
 // DeleteProduct godoc
@@ -111,7 +111,7 @@ func UpdateProduct(c *gin.Context) {
 // @Tags Products
 // @Param id path uint true "Product ID"
 // @Success 200 {object} map[string]string
-// @Router /api/products/{id} [delete]
+// @Router /products/{id} [delete]
 func DeleteProduct(c *gin.Context) {
 	idParam := c.Param("id")
 	// Convert idParam to uint

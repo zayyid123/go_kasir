@@ -63,7 +63,7 @@ info:
   title: Go Kasir API
   version: "1.0"
 paths:
-  /api/categories:
+  /categories:
     get:
       description: Ambil semua kategori
       produces:
@@ -99,7 +99,7 @@ paths:
       summary: Create a new category
       tags:
       - Categories
-  /api/categories/{id}:
+  /categories/{id}:
     delete:
       description: Hapus kategori
       parameters:
@@ -162,7 +162,22 @@ paths:
       summary: Update an existing category
       tags:
       - Categories
-  /api/products:
+  /health:
+    get:
+      description: Check API health status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get health status
+      tags:
+      - Health
+  /products:
     get:
       description: Ambil semua produk
       produces:
@@ -198,7 +213,7 @@ paths:
       summary: Create a new product
       tags:
       - Products
-  /api/products/{id}:
+  /products/{id}:
     delete:
       description: Hapus produk
       parameters:

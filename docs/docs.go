@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/categories": {
+        "/categories": {
             "get": {
                 "description": "Ambil semua kategori",
                 "produces": [
@@ -70,7 +70,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/categories/{id}": {
+        "/categories/{id}": {
             "get": {
                 "description": "Ambil kategori berdasarkan ID",
                 "produces": [
@@ -165,7 +165,30 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/products": {
+        "/health": {
+            "get": {
+                "description": "Check API health status",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Get health status",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/products": {
             "get": {
                 "description": "Ambil semua produk",
                 "produces": [
@@ -220,7 +243,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/products/{id}": {
+        "/products/{id}": {
             "get": {
                 "description": "Ambil produk berdasarkan ID",
                 "produces": [

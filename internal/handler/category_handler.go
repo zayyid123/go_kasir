@@ -18,7 +18,7 @@ import (
 // @Tags Categories
 // @Produce json
 // @Success 200 {array} model.Category
-// @Router /api/categories [get]
+// @Router /categories [get]
 func GetCategories(c *gin.Context) {
 	c.JSON(http.StatusOK, service.GetCategories())
 }
@@ -30,7 +30,7 @@ func GetCategories(c *gin.Context) {
 // @Produce json
 // @Param id path uint true "Category ID"
 // @Success 200 {object} model.Category
-// @Router /api/categories/{id} [get]
+// @Router /categories/{id} [get]
 func GetCategoryByID(c *gin.Context) {
 	idParam := c.Param("id")
 	// Convert idParam to uint
@@ -58,7 +58,7 @@ func GetCategoryByID(c *gin.Context) {
 // @Produce json
 // @Param category body model.CreateCategoryRequest true "Category to create"
 // @Success 201 {object} model.Category
-// @Router /api/categories [post]
+// @Router /categories [post]
 func CreateCategory(c *gin.Context) {
 	var req model.CreateCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -79,7 +79,7 @@ func CreateCategory(c *gin.Context) {
 // @Param id path uint true "Category ID"
 // @Param category body model.UpdateCategoryRequest true "Category data to update"
 // @Success 200 {object} model.Category
-// @Router /api/categories/{id} [put]
+// @Router /categories/{id} [put]
 func UpdateCategory(c *gin.Context) {
 	idParam := c.Param("id")
 	var req model.UpdateCategoryRequest
@@ -96,13 +96,13 @@ func UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	_, err = service.UpdateCategory(id, req)
+	category, err := service.UpdateCategory(id, req)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "category updated successfully"})
+	c.JSON(http.StatusOK, category)
 }
 
 // DeleteCategory godoc
@@ -111,7 +111,7 @@ func UpdateCategory(c *gin.Context) {
 // @Tags Categories
 // @Param id path uint true "Category ID"
 // @Success 200 {object} map[string]string
-// @Router /api/categories/{id} [delete]
+// @Router /categories/{id} [delete]
 func DeleteCategory(c *gin.Context) {
 	idParam := c.Param("id")
 	// Convert idParam to uint
