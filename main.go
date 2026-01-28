@@ -1,6 +1,7 @@
 package main
 
 import (
+	"kasir-api/internal/config"
 	"kasir-api/internal/routes"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,8 @@ import (
 // @description API untuk sistem kasir
 // @BasePath /
 func main() {
+	config.Load()
 	r := gin.Default()
 	routes.Register(r)
-	r.Run(":8080")
+	r.Run(":" + config.Cfg.AppPort)
 }
