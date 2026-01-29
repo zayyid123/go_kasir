@@ -14,9 +14,13 @@ import (
 )
 
 func Register(r *gin.Engine, DB *sql.DB) {
-	repo := repository.NewProductRepo(DB)
-	service := service.NewProductService(repo)
-	handlerProduct := handler.NewProductHandler(service)
+	repoProduct := repository.NewProductRepo(DB)
+	serviceProduct := service.NewProductService(repoProduct)
+	handlerProduct := handler.NewProductHandler(serviceProduct)
+
+	repoCategory := repository.NewCategoryRepo(DB)
+	serviceCategory := service.NewCategoryService(repoCategory)
+	handlerCategory := handler.NewCategoryHandler(serviceCategory)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.GET("/", func(c *gin.Context) {
@@ -36,9 +40,9 @@ func Register(r *gin.Engine, DB *sql.DB) {
 	r.DELETE("/products/:id", handlerProduct.DeleteProduct)
 
 	// Category routes
-	r.GET("/categories", handler.GetCategories)
-	r.POST("/categories", handler.CreateCategory)
-	r.GET("/categories/:id", handler.GetCategoryByID)
-	r.PUT("/categories/:id", handler.UpdateCategory)
-	r.DELETE("/categories/:id", handler.DeleteCategory)
+	r.GET("/categories", handlerCategory.GetCategories)
+	r.POST("/categories", handlerCategory.CreateCategory)
+	r.GET("/categories/:id", handlerCategory.GetCategoryByID)
+	r.PUT("/categories/:id", handlerCategory.UpdateCategory)
+	r.DELETE("/categories/:id", handlerCategory.DeleteCategory)
 }

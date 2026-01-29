@@ -12,6 +12,14 @@ import (
 	"kasir-api/internal/utils"
 )
 
+type CategoryHandler struct {
+	service *service.CategoryService
+}
+
+func NewCategoryHandler(s *service.CategoryService) *CategoryHandler {
+	return &CategoryHandler{service: s}
+}
+
 // GetCategories godoc
 // @Summary Get all categories
 // @Description Ambil semua kategori
@@ -19,8 +27,13 @@ import (
 // @Produce json
 // @Success 200 {array} model.Category
 // @Router /categories [get]
-func GetCategories(c *gin.Context) {
-	c.JSON(http.StatusOK, service.GetCategories())
+func (h *CategoryHandler) GetCategories(c *gin.Context) {
+	data, err := h.service.GetAll()
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, data)
 }
 
 // GetCategoryByID godoc
@@ -28,13 +41,13 @@ func GetCategories(c *gin.Context) {
 // @Description Ambil kategori berdasarkan ID
 // @Tags Categories
 // @Produce json
-// @Param id path uint true "Category ID"
+// @Param id path int true "Category ID"
 // @Success 200 {object} model.Category
 // @Router /categories/{id} [get]
-func GetCategoryByID(c *gin.Context) {
+func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
 	idParam := c.Param("id")
-	// Convert idParam to uint
-	var id uint
+	// Convert idParam to int
+	var id int
 	_, err := fmt.Sscanf(idParam, "%d", &id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid category ID"})
@@ -42,12 +55,12 @@ func GetCategoryByID(c *gin.Context) {
 	}
 
 	// Call service to get category by ID
-	category, err := service.GetCategoryByID(id)
+	data, err := h.service.GetByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, category)
+	c.JSON(http.StatusOK, data)
 }
 
 // CreateCategory godoc
@@ -59,14 +72,18 @@ func GetCategoryByID(c *gin.Context) {
 // @Param category body model.CreateCategoryRequest true "Category to create"
 // @Success 201 {object} model.Category
 // @Router /categories [post]
-func CreateCategory(c *gin.Context) {
+func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	var req model.CreateCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		utils.ValidationErrorResponse(c, err)
 		return
 	}
 
-	category := service.AddCategory(req)
+	category, err := h.service.Create(req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusCreated, category)
 }
 
@@ -76,11 +93,11 @@ func CreateCategory(c *gin.Context) {
 // @Tags Categories
 // @Accept json
 // @Produce json
-// @Param id path uint true "Category ID"
+// @Param id path int true "Category ID"
 // @Param category body model.UpdateCategoryRequest true "Category data to update"
 // @Success 200 {object} model.Category
 // @Router /categories/{id} [put]
-func UpdateCategory(c *gin.Context) {
+func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 	idParam := c.Param("id")
 	var req model.UpdateCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -88,15 +105,15 @@ func UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	// Convert idParam to uint
-	var id uint
+	// Convert idParam to int
+	var id int
 	_, err := fmt.Sscanf(idParam, "%d", &id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid category ID"})
 		return
 	}
 
-	category, err := service.UpdateCategory(id, req)
+	category, err := h.service.Update(id, req)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -109,20 +126,20 @@ func UpdateCategory(c *gin.Context) {
 // @Summary Delete a category
 // @Description Hapus kategori
 // @Tags Categories
-// @Param id path uint true "Category ID"
+// @Param id path int true "Category ID"
 // @Success 200 {object} map[string]string
 // @Router /categories/{id} [delete]
-func DeleteCategory(c *gin.Context) {
+func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	idParam := c.Param("id")
-	// Convert idParam to uint
-	var id uint
+	// Convert idParam to int
+	var id int
 	_, err := fmt.Sscanf(idParam, "%d", &id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid category ID"})
 		return
 	}
 
-	err = service.DeleteCategory(id)
+	err = h.service.Delete(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return

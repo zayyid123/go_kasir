@@ -343,6 +343,9 @@ const docTemplate = `{
         "model.Category": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
