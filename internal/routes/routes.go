@@ -2,47 +2,68 @@ package routes
 
 import (
 	"database/sql"
-	"kasir-api/internal/handler"
-	"kasir-api/internal/repository"
-	"kasir-api/internal/service"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	_ "kasir-api/docs"
+	"kasir-api/internal/handler"
+	"kasir-api/internal/repository"
+	"kasir-api/internal/service"
 )
 
 func Register(r *gin.Engine, DB *sql.DB) {
+	// Initialize repositories
 	repoProduct := repository.NewProductRepo(DB)
-	serviceProduct := service.NewProductService(repoProduct)
-	handlerProduct := handler.NewProductHandler(serviceProduct)
-
 	repoCategory := repository.NewCategoryRepo(DB)
+
+	// Initialize services
+	serviceProduct := service.NewProductService(repoProduct)
 	serviceCategory := service.NewCategoryService(repoCategory)
+
+	// Initialize handlers
+	handlerProduct := handler.NewProductHandler(serviceProduct)
 	handlerCategory := handler.NewCategoryHandler(serviceCategory)
 
+	// Setup routes
+	setupSwaggerRoutes(r)
+	setupGeneralRoutes(r)
+	setupProductRoutes(r, handlerProduct)
+	setupCategoryRoutes(r, handlerCategory)
+}
+
+func setupSwaggerRoutes(r *gin.Engine) {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+}
+
+func setupGeneralRoutes(r *gin.Engine) {
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Welcome to Go Kasir API",
 		})
 	})
-
-	// Health check route
 	r.GET("/health", handler.GetHealth)
+}
 
-	// Product routes
-	r.GET("/products", handlerProduct.GetProducts)
-	r.POST("/products", handlerProduct.CreateProduct)
-	r.GET("/products/:id", handlerProduct.GetProductByID)
-	r.PUT("/products/:id", handlerProduct.UpdateProduct)
-	r.DELETE("/products/:id", handlerProduct.DeleteProduct)
+func setupProductRoutes(r *gin.Engine, h *handler.ProductHandler) {
+	products := r.Group("/products")
+	{
+		products.GET("", h.GetProducts)
+		products.POST("", h.CreateProduct)
+		products.GET("/:id", h.GetProductByID)
+		products.PUT("/:id", h.UpdateProduct)
+		products.DELETE("/:id", h.DeleteProduct)
+	}
+}
 
-	// Category routes
-	r.GET("/categories", handlerCategory.GetCategories)
-	r.POST("/categories", handlerCategory.CreateCategory)
-	r.GET("/categories/:id", handlerCategory.GetCategoryByID)
-	r.PUT("/categories/:id", handlerCategory.UpdateCategory)
-	r.DELETE("/categories/:id", handlerCategory.DeleteCategory)
+func setupCategoryRoutes(r *gin.Engine, h *handler.CategoryHandler) {
+	categories := r.Group("/categories")
+	{
+		categories.GET("", h.GetCategories)
+		categories.POST("", h.CreateCategory)
+		categories.GET("/:id", h.GetCategoryByID)
+		categories.PUT("/:id", h.UpdateCategory)
+		categories.DELETE("/:id", h.DeleteCategory)
+	}
 }
