@@ -389,6 +389,9 @@ const docTemplate = `{
         "model.Product": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },

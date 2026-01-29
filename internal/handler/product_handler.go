@@ -12,6 +12,14 @@ import (
 	"kasir-api/internal/utils"
 )
 
+type ProductHandler struct {
+	service *service.ProductService
+}
+
+func NewProductHandler(s *service.ProductService) *ProductHandler {
+	return &ProductHandler{service: s}
+}
+
 // GetProducts godoc
 // @Summary Get all products
 // @Description Ambil semua produk
@@ -19,8 +27,13 @@ import (
 // @Produce json
 // @Success 200 {array} model.Product
 // @Router /products [get]
-func GetProducts(c *gin.Context) {
-	c.JSON(http.StatusOK, service.GetProducts())
+func (h *ProductHandler) GetProducts(c *gin.Context) {
+	data, err := h.service.GetAll()
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, data)
 }
 
 // GetProductByID godoc
@@ -28,13 +41,13 @@ func GetProducts(c *gin.Context) {
 // @Description Ambil produk berdasarkan ID
 // @Tags Products
 // @Produce json
-// @Param id path uint true "Product ID"
+// @Param id path int true "Product ID"
 // @Success 200 {object} model.Product
 // @Router /products/{id} [get]
-func GetProductByID(c *gin.Context) {
+func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	idParam := c.Param("id")
-	// Convert idParam to uint
-	var id uint
+	// Convert idParam to int
+	var id int
 	_, err := fmt.Sscanf(idParam, "%d", &id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid product ID"})
@@ -42,12 +55,12 @@ func GetProductByID(c *gin.Context) {
 	}
 
 	// Call service to get product by ID
-	product, err := service.GetProductByID(id)
+	data, err := h.service.GetByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, product)
+	c.JSON(http.StatusOK, data)
 }
 
 // CreateProduct godoc
@@ -59,14 +72,18 @@ func GetProductByID(c *gin.Context) {
 // @Param product body model.CreateProductRequest true "Product to create"
 // @Success 201 {object} model.Product
 // @Router /products [post]
-func CreateProduct(c *gin.Context) {
+func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	var req model.CreateProductRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		utils.ValidationErrorResponse(c, err)
 		return
 	}
 
-	product := service.AddProduct(req)
+	product, err := h.service.Create(req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusCreated, product)
 }
 
@@ -76,11 +93,11 @@ func CreateProduct(c *gin.Context) {
 // @Tags Products
 // @Accept json
 // @Produce json
-// @Param id path uint true "Product ID"
+// @Param id path int true "Product ID"
 // @Param product body model.UpdateProductRequest true "Product data to update"
 // @Success 200 {object} model.Product
 // @Router /products/{id} [put]
-func UpdateProduct(c *gin.Context) {
+func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	idParam := c.Param("id")
 	var req model.UpdateProductRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -88,15 +105,15 @@ func UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	// Convert idParam to uint
-	var id uint
+	// Convert idParam to int
+	var id int
 	_, err := fmt.Sscanf(idParam, "%d", &id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid product ID"})
 		return
 	}
 
-	product, err := service.UpdateProduct(id, req)
+	product, err := h.service.Update(id, req)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -109,20 +126,20 @@ func UpdateProduct(c *gin.Context) {
 // @Summary Delete a product
 // @Description Hapus produk
 // @Tags Products
-// @Param id path uint true "Product ID"
+// @Param id path int true "Product ID"
 // @Success 200 {object} map[string]string
 // @Router /products/{id} [delete]
-func DeleteProduct(c *gin.Context) {
+func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	idParam := c.Param("id")
-	// Convert idParam to uint
-	var id uint
+	// Convert idParam to int
+	var id int
 	_, err := fmt.Sscanf(idParam, "%d", &id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid product ID"})
 		return
 	}
 
-	err = service.DeleteProduct(id)
+	err = h.service.Delete(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return

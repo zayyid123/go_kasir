@@ -1,7 +1,10 @@
 package routes
 
 import (
+	"database/sql"
 	"kasir-api/internal/handler"
+	"kasir-api/internal/repository"
+	"kasir-api/internal/service"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -10,7 +13,11 @@ import (
 	_ "kasir-api/docs"
 )
 
-func Register(r *gin.Engine) {
+func Register(r *gin.Engine, DB *sql.DB) {
+	repo := repository.NewProductRepo(DB)
+	service := service.NewProductService(repo)
+	handlerProduct := handler.NewProductHandler(service)
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -22,11 +29,11 @@ func Register(r *gin.Engine) {
 	r.GET("/health", handler.GetHealth)
 
 	// Product routes
-	r.GET("/products", handler.GetProducts)
-	r.POST("/products", handler.CreateProduct)
-	r.GET("/products/:id", handler.GetProductByID)
-	r.PUT("/products/:id", handler.UpdateProduct)
-	r.DELETE("/products/:id", handler.DeleteProduct)
+	r.GET("/products", handlerProduct.GetProducts)
+	r.POST("/products", handlerProduct.CreateProduct)
+	r.GET("/products/:id", handlerProduct.GetProductByID)
+	r.PUT("/products/:id", handlerProduct.UpdateProduct)
+	r.DELETE("/products/:id", handlerProduct.DeleteProduct)
 
 	// Category routes
 	r.GET("/categories", handler.GetCategories)

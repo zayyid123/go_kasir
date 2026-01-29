@@ -1,59 +1,34 @@
 package service
 
 import (
-	"errors"
 	"kasir-api/internal/model"
-	"kasir-api/internal/store"
+	"kasir-api/internal/repository"
 )
 
-func GetProducts() []model.Product {
-	return store.Products
+type ProductService struct {
+	repo repository.ProductRepository
 }
 
-func AddProduct(p model.CreateProductRequest) model.Product {
-	product := model.Product{
-		ID:    store.ProductAutoID,
-		Name:  p.Name,
-		Price: int(p.Price),
-		Stock: p.Stock,
-	}
-	store.ProductAutoID++
-
-	store.Products = append(store.Products, product)
-	return product
+func NewProductService(r repository.ProductRepository) *ProductService {
+	return &ProductService{repo: r}
 }
 
-func GetProductByID(id uint) (model.Product, error) {
-	for _, p := range store.Products {
-		if p.ID == id {
-			return p, nil
-		}
-	}
-	return model.Product{}, errors.New("produk tidak ditemukan")
+func (s *ProductService) GetAll() ([]model.Product, error) {
+	return s.repo.GetAll()
 }
 
-func UpdateProduct(id uint, updated model.UpdateProductRequest) (model.Product, error) {
-	for i, p := range store.Products {
-		if p.ID == id {
-			updatedProduct := model.Product{
-				ID:    id,
-				Name:  updated.Name,
-				Price: int(updated.Price),
-				Stock: updated.Stock,
-			}
-			store.Products[i] = updatedProduct
-			return updatedProduct, nil
-		}
-	}
-	return model.Product{}, errors.New("produk tidak ditemukan")
+func (s *ProductService) GetByID(id int) (model.Product, error) {
+	return s.repo.GetByID(id)
 }
 
-func DeleteProduct(id uint) error {
-	for i, p := range store.Products {
-		if p.ID == id {
-			store.Products = append(store.Products[:i], store.Products[i+1:]...)
-			return nil
-		}
-	}
-	return errors.New("produk tidak ditemukan")
+func (s *ProductService) Create(p model.CreateProductRequest) (model.Product, error) {
+	return s.repo.Create(p)
+}
+
+func (s *ProductService) Update(id int, p model.UpdateProductRequest) (model.Product, error) {
+	return s.repo.Update(id, p)
+}
+
+func (s *ProductService) Delete(id int) error {
+	return s.repo.Delete(id)
 }
