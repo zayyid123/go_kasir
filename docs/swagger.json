@@ -367,10 +367,14 @@
         "model.CreateProductRequest": {
             "type": "object",
             "required": [
+                "category_id",
                 "name",
                 "price"
             ],
             "properties": {
+                "category_id": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -385,6 +389,9 @@
         "model.Product": {
             "type": "object",
             "properties": {
+                "category_id": {
+                    "type": "integer"
+                },
                 "created_at": {
                     "type": "string"
                 },

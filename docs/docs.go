@@ -374,10 +374,14 @@ const docTemplate = `{
         "model.CreateProductRequest": {
             "type": "object",
             "required": [
+                "category_id",
                 "name",
                 "price"
             ],
             "properties": {
+                "category_id": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -392,6 +396,9 @@ const docTemplate = `{
         "model.Product": {
             "type": "object",
             "properties": {
+                "category_id": {
+                    "type": "integer"
+                },
                 "created_at": {
                     "type": "string"
                 },
