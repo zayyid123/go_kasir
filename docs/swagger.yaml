@@ -189,6 +189,11 @@ paths:
   /products:
     get:
       description: Ambil semua produk
+      parameters:
+      - description: Filter produk berdasarkan nama
+        in: query
+        name: name
+        type: string
       produces:
       - application/json
       responses:

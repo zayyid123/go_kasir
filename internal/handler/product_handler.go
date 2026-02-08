@@ -25,10 +25,13 @@ func NewProductHandler(s *service.ProductService) *ProductHandler {
 // @Description Ambil semua produk
 // @Tags Products
 // @Produce json
+// @Param name query string false "Filter produk berdasarkan nama"
 // @Success 200 {array} model.Product
 // @Router /products [get]
 func (h *ProductHandler) GetProducts(c *gin.Context) {
-	data, err := h.service.GetAll()
+	nameParam := c.Query("name")
+	fmt.Println(nameParam)
+	data, err := h.service.GetAll(nameParam)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return

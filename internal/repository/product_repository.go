@@ -6,7 +6,7 @@ import (
 )
 
 type ProductRepository interface {
-	GetAll() ([]model.ProductWithCategory, error)
+	GetAll(name string) ([]model.ProductWithCategory, error)
 	GetByID(id int) (model.ProductWithCategory, error)
 	Create(p model.CreateProductRequest) (model.ProductWithCategory, error)
 	Update(id int, p model.UpdateProductRequest) (model.Product, error)
@@ -21,15 +21,21 @@ func NewProductRepo(db *sql.DB) ProductRepository {
 	return &productRepo{db: db}
 }
 
-func (r *productRepo) GetAll() ([]model.ProductWithCategory, error) {
-	rows, err := r.db.Query(`
-	select 
-		p.id, p.name, p.price, p.stock, p.created_at, p.category_id,
-		c.id, c.name, c.description, c.created_at
+func (r *productRepo) GetAll(name string) ([]model.ProductWithCategory, error) {
+	query := `select 
+	p.id, p.name, p.price, p.stock, p.created_at, p.category_id, c.id, c.name, c.description, c.created_at
 	from public.product p
-	left join public.category c on c.id = p.category_id
-	order by p.id
-`)
+	left join public.category c on c.id = p.category_id`
+
+	var args []interface{}
+	if name != "" {
+		query += " where p.name ilike $1"
+		args = append(args, "%"+name+"%")
+	}
+
+	query += " order by p.id"
+
+	rows, err := r.db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
