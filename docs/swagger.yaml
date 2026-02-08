@@ -1,5 +1,23 @@
 basePath: /
 definitions:
+  model.AllReport:
+    properties:
+      best_seller:
+        $ref: '#/definitions/model.BestSeller'
+      total_revenue:
+        type: integer
+      total_transaction:
+        type: integer
+    type: object
+  model.BestSeller:
+    properties:
+      name:
+        type: string
+      product_id:
+        type: integer
+      sold:
+        type: integer
+    type: object
   model.Category:
     properties:
       created_at:
@@ -332,6 +350,36 @@ paths:
       summary: Update an existing product
       tags:
       - Products
+  /report:
+    get:
+      description: Ambil report penjualan
+      parameters:
+      - description: 'Start date (format: YYYY-MM-DD)'
+        in: query
+        name: start
+        type: string
+      - description: 'End date (format: YYYY-MM-DD)'
+        in: query
+        name: end
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.AllReport'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get reports
+      tags:
+      - Report
   /transaction/checkout:
     post:
       consumes:

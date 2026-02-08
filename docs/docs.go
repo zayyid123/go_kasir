@@ -346,6 +346,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/report": {
+            "get": {
+                "description": "Ambil report penjualan",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get reports",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date (format: YYYY-MM-DD)",
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (format: YYYY-MM-DD)",
+                        "name": "end",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.AllReport"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/transaction/checkout": {
             "post": {
                 "description": "Buat Transaksi",
@@ -382,6 +428,34 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.AllReport": {
+            "type": "object",
+            "properties": {
+                "best_seller": {
+                    "$ref": "#/definitions/model.BestSeller"
+                },
+                "total_revenue": {
+                    "type": "integer"
+                },
+                "total_transaction": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.BestSeller": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "product_id": {
+                    "type": "integer"
+                },
+                "sold": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.Category": {
             "type": "object",
             "properties": {

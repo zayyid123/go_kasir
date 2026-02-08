@@ -30,7 +30,6 @@ func NewProductHandler(s *service.ProductService) *ProductHandler {
 // @Router /products [get]
 func (h *ProductHandler) GetProducts(c *gin.Context) {
 	nameParam := c.Query("name")
-	fmt.Println(nameParam)
 	data, err := h.service.GetAll(nameParam)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
