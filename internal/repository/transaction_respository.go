@@ -30,10 +30,35 @@ func (r *transactionRepo) Checkout(items []model.CheckoutItem) (*model.Transacti
 	}
 	defer tx.Rollback()
 
+	// Insert transaction first (total_amount 0)
 	var (
-		totalAmount int
-		details     = make([]model.TransactionDetail, 0)
+		transactionID int
+		createdAt     string
 	)
+
+	err = tx.QueryRow(`
+		INSERT INTO transaction (total_amount)
+		VALUES (0)
+		RETURNING id, created_at
+	`).Scan(&transactionID, &createdAt)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2️⃣ Prepare statement insert transaction detail
+	stmtDetail, err := tx.Prepare(`
+		INSERT INTO transaction_detail
+		(transaction_id, product_id, quantity, subtotal)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer stmtDetail.Close()
+
+	totalAmount := 0
+	details := make([]model.TransactionDetail, 0, len(items))
 
 	for _, item := range items {
 		if item.Quantity <= 0 {
@@ -45,10 +70,12 @@ func (r *transactionRepo) Checkout(items []model.CheckoutItem) (*model.Transacti
 			productPrice int
 		)
 
-		err := tx.QueryRow(
-			`SELECT name, price FROM product WHERE id = $1`,
-			item.ProductID,
-		).Scan(&productName, &productPrice)
+		// Check is product exist
+		err = tx.QueryRow(`
+			SELECT name, price
+			FROM product
+			WHERE id = $1
+		`, item.ProductID).Scan(&productName, &productPrice)
 
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("product id %d not found", item.ProductID)
@@ -57,7 +84,7 @@ func (r *transactionRepo) Checkout(items []model.CheckoutItem) (*model.Transacti
 			return nil, err
 		}
 
-		// 🛡️ Safe stock update (anti overselling)
+		// Safe stock update
 		res, err := tx.Exec(`
 			UPDATE product
 			SET stock = stock - $1
@@ -78,45 +105,36 @@ func (r *transactionRepo) Checkout(items []model.CheckoutItem) (*model.Transacti
 		subtotal := productPrice * item.Quantity
 		totalAmount += subtotal
 
-		details = append(details, model.TransactionDetail{
-			ProductID:   item.ProductID,
-			ProductName: productName,
-			Quantity:    item.Quantity,
-			Subtotal:    subtotal,
-		})
-	}
-
-	var (
-		transactionID int
-		createdAt     string
-	)
-
-	err = tx.QueryRow(`
-		INSERT INTO transaction (total_amount)
-		VALUES ($1)
-		RETURNING id, created_at
-	`, totalAmount).Scan(&transactionID, &createdAt)
-	if err != nil {
-		return nil, err
-	}
-
-	for i := range details {
-		details[i].TransactionID = transactionID
+		// Insert transaction detail
 		var detailID int
-
-		err = tx.QueryRow(`
-			INSERT INTO transaction_detail
-			(transaction_id, product_id, quantity, subtotal)
-			VALUES ($1, $2, $3, $4)
-			RETURNING id
-		`, transactionID, details[i].ProductID, details[i].Quantity, details[i].Subtotal).
-			Scan(&detailID)
-
+		err = stmtDetail.QueryRow(
+			transactionID,
+			item.ProductID,
+			item.Quantity,
+			subtotal,
+		).Scan(&detailID)
 		if err != nil {
 			return nil, err
 		}
 
-		details[i].ID = detailID
+		details = append(details, model.TransactionDetail{
+			ID:            detailID,
+			TransactionID: transactionID,
+			ProductID:     item.ProductID,
+			ProductName:   productName,
+			Quantity:      item.Quantity,
+			Subtotal:      subtotal,
+		})
+	}
+
+	// Update total amount after all transaction
+	_, err = tx.Exec(`
+		UPDATE transaction
+		SET total_amount = $1
+		WHERE id = $2
+	`, totalAmount, transactionID)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := tx.Commit(); err != nil {
