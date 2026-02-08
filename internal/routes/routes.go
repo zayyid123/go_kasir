@@ -17,20 +17,24 @@ func Register(r *gin.Engine, DB *sql.DB) {
 	// Initialize repositories
 	repoProduct := repository.NewProductRepo(DB)
 	repoCategory := repository.NewCategoryRepo(DB)
+	repoTransaction := repository.NewTransactionRepo(DB)
 
 	// Initialize services
 	serviceProduct := service.NewProductService(repoProduct)
 	serviceCategory := service.NewCategoryService(repoCategory)
+	serviceTransaction := service.NewTransactionService(repoTransaction)
 
 	// Initialize handlers
 	handlerProduct := handler.NewProductHandler(serviceProduct)
 	handlerCategory := handler.NewCategoryHandler(serviceCategory)
+	handlerTransaction := handler.NewTransactionHandler(serviceTransaction)
 
 	// Setup routes
 	setupSwaggerRoutes(r)
 	setupGeneralRoutes(r)
 	setupProductRoutes(r, handlerProduct)
 	setupCategoryRoutes(r, handlerCategory)
+	setupTransactionRoutes(r, handlerTransaction)
 }
 
 func setupSwaggerRoutes(r *gin.Engine) {
@@ -65,5 +69,12 @@ func setupCategoryRoutes(r *gin.Engine, h *handler.CategoryHandler) {
 		categories.GET("/:id", h.GetCategoryByID)
 		categories.PUT("/:id", h.UpdateCategory)
 		categories.DELETE("/:id", h.DeleteCategory)
+	}
+}
+
+func setupTransactionRoutes(r *gin.Engine, h *handler.TransactionHandler) {
+	transaction := r.Group("/transaction")
+	{
+		transaction.POST("/checkout", h.Checkout)
 	}
 }

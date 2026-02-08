@@ -11,6 +11,20 @@ definitions:
       name:
         type: string
     type: object
+  model.CheckoutItem:
+    properties:
+      product_id:
+        type: integer
+      quantity:
+        type: integer
+    type: object
+  model.CheckoutRequest:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/model.CheckoutItem'
+        type: array
+    type: object
   model.CreateCategoryRequest:
     properties:
       description:
@@ -48,6 +62,34 @@ definitions:
       price:
         type: integer
       stock:
+        type: integer
+    type: object
+  model.Transaction:
+    properties:
+      created_at:
+        type: string
+      details:
+        items:
+          $ref: '#/definitions/model.TransactionDetail'
+        type: array
+      id:
+        type: integer
+      total_amount:
+        type: integer
+    type: object
+  model.TransactionDetail:
+    properties:
+      id:
+        type: integer
+      product_id:
+        type: integer
+      product_name:
+        type: string
+      quantity:
+        type: integer
+      subtotal:
+        type: integer
+      transaction_id:
         type: integer
     type: object
   model.UpdateCategoryRequest:
@@ -290,4 +332,26 @@ paths:
       summary: Update an existing product
       tags:
       - Products
+  /transaction/checkout:
+    post:
+      consumes:
+      - application/json
+      description: Buat Transaksi
+      parameters:
+      - description: Transaction to create
+        in: body
+        name: transaction
+        required: true
+        schema:
+          $ref: '#/definitions/model.CheckoutRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Transaction'
+      summary: Checkout product
+      tags:
+      - Transaction
 swagger: "2.0"
