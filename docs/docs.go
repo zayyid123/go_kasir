@@ -360,16 +360,48 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Start date (format: YYYY-MM-DD)",
-                        "name": "start",
+                        "name": "start_date",
                         "in": "query"
                     },
                     {
                         "type": "string",
                         "description": "End date (format: YYYY-MM-DD)",
-                        "name": "end",
+                        "name": "end_date",
                         "in": "query"
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.AllReport"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/report/today": {
+            "get": {
+                "description": "Ambil report penjualan hari ini",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get reports",
                 "responses": {
                     "200": {
                         "description": "OK",

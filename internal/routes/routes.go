@@ -87,5 +87,6 @@ func setupReportRoutes(r *gin.Engine, h *handler.ReportHandler) {
 	report := r.Group("/report")
 	{
 		report.GET("", h.Report)
+		report.GET("/today", h.ReportToday)
 	}
 }

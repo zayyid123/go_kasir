@@ -356,12 +356,33 @@ paths:
       parameters:
       - description: 'Start date (format: YYYY-MM-DD)'
         in: query
-        name: start
+        name: start_date
         type: string
       - description: 'End date (format: YYYY-MM-DD)'
         in: query
-        name: end
+        name: end_date
         type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.AllReport'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get reports
+      tags:
+      - Report
+  /report/today:
+    get:
+      description: Ambil report penjualan hari ini
       produces:
       - application/json
       responses:
